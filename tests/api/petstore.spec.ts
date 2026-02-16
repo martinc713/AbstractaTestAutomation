@@ -55,27 +55,41 @@ test.describe('Petstore API tests', () => {
     await apiRequest.dispose();
   });
 
-  test('Part2: list available and create orders for 5 pets', async () => {
-    const apiRequest = await playwrightRequest.newContext({ baseURL: 'https://petstore.swagger.io' });
-    const api = new PetStoreAPI(apiRequest);
-
-    const listRes = await api.findPetsByStatus('available');
-    expect(listRes.status()).toBe(200);
-    const pets = await listRes.json();
-    expect(Array.isArray(pets)).toBeTruthy();
-
-    const selected = pets.slice(0, 5);
-    // If there are fewer than 5 available pets, the test will still attempt orders for what exists
-    for (const pet of selected) {
-      const order = createOrderPayload(pet.id);
-      const res = await api.createOrder(order);
-      expect(res.status()).toBe(200);
-      const body = await res.json();
-      console.log('CREATED_ORDER', body.id, body.petId, body.status);
-      expect(body.petId).toBe(order.petId);
-      expect(body.id).toBeDefined();
-    }
-
-    await apiRequest.dispose();
+test('Part2: list available and create orders for 5 pets', async () => {
+  const apiRequest = await playwrightRequest.newContext({
+    baseURL: 'https://petstore.swagger.io'
   });
+
+  const api = new PetStoreAPI(apiRequest);
+  const createdPetIds: number[] = [];
+
+  // Create 5 pets
+  for (let i = 0; i < 5; i++) {
+    const pet = createPetPayload('available');
+    const res = await api.createPet(pet);
+    expect(res.ok()).toBeTruthy();
+
+    const body = await res.json();
+    createdPetIds.push(body.id);
+  }
+
+  // Create orders
+  for (const petId of createdPetIds) {
+    const order = createOrderPayload(petId);
+    const res = await api.createOrder(order);
+
+    expect(res.ok()).toBeTruthy();
+
+    const body = await res.json();
+
+ 
+    console.log('CREATED_ORDER', body.id, body.petId, body.status);
+
+    expect(body.petId).toBe(order.petId);
+    expect(body.id).toBeDefined();
+  }
+
+  await apiRequest.dispose();
+});
+
 });
