@@ -143,3 +143,52 @@ npx playwright show-report
 ✅ **TypeScript**: Tipado fuerte para evitar errores.
 ✅ **Configuración centralizada**: `playwright.config.ts` con baseURL y opciones globales.
 
+## **Pruebas de API (Petstore)**
+
+Se incluyen pruebas API que validan funcionalidades del servicio de ejemplo Petstore (https://petstore.swagger.io). Estas pruebas están en `tests/api/petstore.spec.ts` y usan el cliente en `apis/PetStoreAPI.ts` y los helpers en `utils/petData.ts`.
+
+- **Part 1** (`tests/api/petstore.spec.ts` - test "Part1: create 10 pets and get sold pet"): crea 10 mascotas (5 `available`, 4 `pending`, 1 `sold`), guarda los ids y consulta la mascota `sold` comprobando que su `status` es `sold`.
+- **Part 2** (`tests/api/petstore.spec.ts` - test "Part2: list available and create orders for 5 pets"): lista mascotas `available`, selecciona 5 y crea una orden por cada una; valida respuestas y campos devueltos.
+
+Cómo ejecutar las pruebas API:
+
+```bash
+# Ejecutar todas las pruebas API
+npx playwright test tests/api/petstore.spec.ts
+
+# Ejecutar solo Part1
+npx playwright test tests/api/petstore.spec.ts -g "Part1: create 10 pets and get sold pet"
+
+# Ejecutar solo Part2
+npx playwright test tests/api/petstore.spec.ts -g "Part2: list available and create orders for 5 pets"
+```
+
+Ver logs y verificar datos creados:
+
+- Los tests imprimen logs identificables:
+   - `CREATED_PET <id> <name> <status>` al crear cada mascota.
+   - `CREATED_ORDER <id> <petId> <status>` al crear órdenes.
+
+- En PowerShell filtra la salida del test para ver los IDs:
+
+```powershell
+npx playwright test tests/api/petstore.spec.ts -g "Part1: create 10 pets and get sold pet" 2>&1 | Select-String -Pattern "CREATED_PET"
+npx playwright test tests/api/petstore.spec.ts -g "Part2: list available and create orders for 5 pets" 2>&1 | Select-String -Pattern "CREATED_ORDER"
+```
+
+- Alternativa: usar Swagger UI (https://petstore.swagger.io) → `pet` → `GET /pet/findByStatus` o `GET /pet/{petId}` y buscar `name` con prefijo `available-`, `pending-` o `sold-` (los tests prefijan nombres para facilitar la identificación).
+
+Notas operativas:
+
+- Las órdenes en el servidor de prueba aceptan `orderId` válidos entre 1 y 10 para ciertos endpoints; los helpers garantizan IDs únicos en ese rango durante la ejecución de la suite para evitar colisiones.
+- Si necesitas limpieza, puedes añadir llamadas `DELETE /v2/pet/{petId}` o `DELETE /v2/store/order/{orderId}` al final de los tests o ejecutar un script de limpieza manual desde Swagger/Curl.
+- Los tests usan datos sintéticos; no emplees datos personales reales.
+
+Ficheros clave:
+
+- Cliente API: `apis/PetStoreAPI.ts`
+- Helpers de datos: `utils/petData.ts`
+- Tests: `tests/api/petstore.spec.ts`
+- README específico: `README_API.md`
+
+
