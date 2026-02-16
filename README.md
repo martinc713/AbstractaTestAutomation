@@ -1,6 +1,8 @@
-# Demoblaze Playwright TypeScript - Automation Framework
+Demoblaze & Petstore Playwright TypeScript - Automation Framework
+Framework completo de automatización de pruebas end-to-end (E2E) y pruebas de API, construido con Playwright y TypeScript. Incluye:
 
-Un framework robusto de automatización de pruebas end-to-end (E2E) construido con **Playwright** y **TypeScript** para probar la tienda de demostración Demoblaze (https://www.demoblaze.com).
+Automatización de la tienda Demoblaze (web scraping, compra, carrito, autenticación)
+Pruebas de API sobre Petstore (https://petstore.swagger.io)
 
 ## 📋 Descripción del Proyecto
 
@@ -9,6 +11,8 @@ Este framework automatiza pruebas críticas de una tienda de electrónica:
 - **Compra de productos**: Automatiza el flujo completo de compra con validación de confirmación.
 - **Gestión del carrito**: Prueba agregar 2 artículos y eliminar uno, verificando integridad.
 - **Autenticación**: Crea una cuenta, hace login y verifica el mensaje de bienvenida.
+
+Además probamos la Petstore API: Validando escenarios de negocio sobre una API REST pública, generando y verificando datos sintéticos.
 
 ## 🏗️ Arquitectura - Page Objects
 
@@ -24,23 +28,28 @@ El framework implementa el patrón **Page Object Model** para máxima mantenibil
 
 ```
 demoblaze-playwright-ts/
-├── pages/
+├── pages/                  # Page Objects para Demoblaze
 │   ├── BasePage.ts
 │   ├── HomePage.ts
 │   ├── ProductPage.ts
 │   ├── CartPage.ts
 │   └── AuthPage.ts
 ├── tests/
-│   ├── scraping.spec.ts          # Extrae productos de 2 páginas
-│   ├── purchase.spec.ts          # Compra un producto
-│   ├── add_remove_cart.spec.ts   # Agrega 2 items y elimina 1
-│   └── signup_login.spec.ts      # Signup, login y verifica welcome
+│   ├── scraping.spec.ts          # Scraping de productos Demoblaze
+│   ├── purchase.spec.ts          # Flujo de compra Demoblaze
+│   ├── add_remove_cart.spec.ts   # Carrito Demoblaze
+│   ├── signup_login.spec.ts      # Sign Up y Login Demoblaze
+│   └── api/
+│       └── petstore.spec.ts      # Pruebas API Petstore
+├── apis/
+│   └── PetStoreAPI.ts            # Cliente API Petstore
 ├── utils/
-│   └── fileWriter.ts             # Escribe productos a archivo .txt
-├── playwright.config.ts          # Configuración de Playwright
-├── tsconfig.json                 # Configuración de TypeScript
+│   ├── fileWriter.ts             # Utilidad para escribir productos
+│   └── petData.ts                # Helpers de datos Petstore
+├── playwright.config.ts          # Configuración Playwright
+├── tsconfig.json                 # Configuración TypeScript
 ├── package.json                  # Dependencias
-└── README.md
+├── README.md                     # Esta guía
 ```
 
 ## 🚀 Instalación y Configuración
@@ -74,12 +83,13 @@ demoblaze-playwright-ts/
 npm run test
 ```
 
-### Test específico
+### Test específicos
 ```bash
 npx playwright test tests/scraping.spec.ts
 npx playwright test tests/purchase.spec.ts
 npx playwright test tests/add_remove_cart.spec.ts
 npx playwright test tests/signup_login.spec.ts
+npx playwright test tests/api/petstore.spec.ts
 ```
 
 ### Con modo headed (ver navegador)
@@ -127,6 +137,16 @@ npx playwright show-report
 - Verifica que aparece el mensaje "Welcome <username>" en la esquina superior derecha.
 
 **Validación**: Presencia y contenido de `#nameofuser`.
+
+Petstore API
+1. Crear Mascotas y Consultar
+
+- Crea 10 mascotas (5 available, 4 pending, 1 sold).
+- Consulta la mascota sold y validando su status.
+- Listar y Ordenar Mascotas
+
+2. Lista 5 mascotas available.
+- Crea una orden por cada una, validando la respuesta.
 
 ## 🔧 Tecnologías Utilizadas
 
